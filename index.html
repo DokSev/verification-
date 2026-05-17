@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VALIDAČNÝ SYSTÉM SK</title>
+    <style>
+        :root {
+            --primary-green: #2ecc71;
+            --error-red: #e74c3c;
+            --dark-blue: #0d1b2a;
+            --concrete-grey: #546e7a;
+            --bg-color: #f8f9fa;
+            --ebony-black: #0d0d0d;
+        }
+
+        /* Protection contre la sélection de texte */
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: #1a1a1a;
+            font-size: 21px; 
+            text-align: center;
+            overflow-x: hidden;
+        }
+
+        .content-blur { filter: blur(35px) !important; pointer-events: none; }
+
+        .fade-up { animation: fadeUp 1.2s ease-out; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .main-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .header-box {
+            background: white;
+            padding: 30px;
+            border-radius: 2px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            font-size: 26px;
+            letter-spacing: 1px;
+            margin: 0;
+            color: var(--dark-blue);
+            text-transform: uppercase;
+        }
+
+        /* Boutons épurés : mots robustes et cliquables sans forme rectangulaire */
+        .btn-minimal, .btn-concrete, .btn-concrete-back {
+            background: none;
+            border: none;
+            color: var(--dark-blue);
+            font-family: 'Times New Roman', Times, serif;
+            font-weight: bold;
+            font-size: 20px;
+            text-decoration: underline;
+            cursor: pointer;
+            padding: 5px 10px;
+            display: inline-block;
+            margin: 20px auto;
+            transition: color 0.2s ease;
+        }
+        .btn-minimal:hover, .btn-concrete:hover, .btn-concrete-back:hover {
+            color: var(--primary-green);
+        }
+        .btn-concrete-back {
+            color: var(--concrete-grey);
+            font-size: 18px;
+        }
+
+        .code-grid { display: flex; justify-content: center; gap: 8px; margin: 25px 0; }
+        .box {
+            width: 42px;
+            height: 58px;
+            font-size: 26px;
+            font-family: 'Times New Roman', serif;
+            text-align: center;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            outline: none;
+            background: white;
+        }
+
+        .shake { animation: shake 0.4s ease-in-out; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        /* Jauge horizontale */
+        .progress-bar-container {
+            width: 100%;
+            height: 14px;
+            background: #eee;
+            border-radius: 10px;
+            margin: 30px auto;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid #ddd;
+        }
+        .progress-bar-liquid {
+            width: 0%;
+            height: 100%;
+            background: var(--primary-green);
+            border-radius: 10px;
+            transition: width 4s linear;
+        }
+
+        /* Cercle de chargement liquide vert avec crochet blanc au centre */
+        .circle-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 30px auto;
+            border-radius: 50%;
+            border: 4px solid #ddd;
+            overflow: hidden;
+            background: white;
+        }
+        .circle-liquid {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background: var(--primary-green);
+            transition: height 3s linear;
+            z-index: 1;
+        }
+        .checkmark-white {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 50px;
+            font-weight: bold;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        /* Zone d'affichage du PDF */
+        .pdf-container {
+            position: relative;
+            width: 100%;
+            height: 550px;
+            margin-top: 20px;
+        }
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: var(--primary-green);
+            box-shadow: 0 0 15px var(--primary-green);
+            top: 0;
+            z-index: 5;
+        }
+        .scan-active { animation: moveScan 4s infinite linear; }
+        @keyframes moveScan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
+
+        #eye-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--dark-blue);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+            font-size: 28px;
+        }
+        .eye-barred::after {
+            content: "";
+            position: absolute;
+            width: 80%;
+            height: 3px;
+            background: #e74c3c;
+            transform: rotate(-45deg);
+        }
+
+        .hidden { display: none !important; }
+        
+        .blink-text { animation: blink infinite 1.8s ease-in-out; font-style: italic; color: #555; font-size: 17px; margin: 20px 0; display: block; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.1; } }
+
+        /* Vraie flèche robuste qui pointe vers le haut en Noir Ébène */
+        .arrow-up-css {
+            display: inline-block;
+            font-weight: bold;
+            color: var(--ebony-black);
+            font-size: 24px;
+            margin: 0 4px;
+            vertical-align: middle;
+        }
+
+        .tech-msg-display-zone {
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            line-height: 1.5;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
+            margin-top: 30px;
+        }
+        .tech-display-text { animation: fadeInMsg 0.4s ease-in-out; color: var(--dark-blue); text-align: left; width: 100%; }
+        @keyframes fadeInMsg { from { opacity: 0; } to { opacity: 1; } }
+
+        ul.instructions-list { text-align: left; display: inline-block; padding-left: 20px; font-size: 18px; }
+
+        .email-display-box {
+            background: white;
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-top: 15px;
+            font-size: 18px;
+            color: var(--dark-blue);
+            border-left: 4px solid var(--concrete-grey);
+        }
+
+        /* Style pour le lien de l'adresse email épuré et robuste */
+        .email-link {
+            color: var(--ebony-black);
+            font-weight: bold;
+            text-decoration: underline;
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text; /* Permet la sélection et le copier si besoin */
+        }
+        .email-link:hover {
+            color: var(--primary-green);
+        }
+        
+        .layout-left { text-align: left; margin-bottom: 20px; font-size: 18px; line-height: 1.5; }
+
+        /* Bandeau de texte supérieur de validation en Noir Ébène */
+        .status-top-bar {
+            color: var(--ebony-black); 
+            padding: 15px; 
+            font-weight: bold; 
+            font-size: 22px; 
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+<div id="eye-container" onclick="togglePrivacy()">👁</div>
+
+<div id="main-content" class="main-container">
+    
+    <section id="page-home" class="fade-up">
+        <div class="header-box">
+            <h1>VALIDAČNÝ SYSTÉM SK</h1>
+        </div>
+        <p>Vitajte na oficiálnom portáli digitálneho overovania dokumentov.</p>
+        <p>Tento prístup podlieha prísnemu protokolu:</p>
+        <ul class="instructions-list">
+            <li>Kliknite na tlačidlo nižšie pre prístup k terminálu.</li>
+            <li>Zadajte svoj unikátny 7-miestny kód.</li>
+            <li>Systém vykoná analýzu v národnom registri.</li>
+        </ul>
+        <br>
+        <button class="btn-minimal" onclick="checkInitialBlock()">Prístup do systému</button>
+    </section>
+
+    <section id="page-terminal" class="hidden fade-up">
+        <div class="header-box">
+            <h1>AUTORIZOVANÁ ZÓNA</h1>
+        </div>
+        <p style="font-size: 18px;">Zadajte svoj unikátny 7-miestny overovací kód (kombinácia písmen a číslic) pridelený k vášmu spisu.</p>
+        
+        <div class="code-grid" id="code-inputs"></div>
+        
+        <button class="btn-minimal" onclick="startVerificationProcess()">Overiť kód</button>
+        <br>
+        
+        <div style="background:#fff4f4; padding: 15px; border-left: 5px solid #e74c3c; margin: 25px 0; font-size: 17px; text-align: left;">
+            <strong>Upozornenie:</strong> Zadanie nesprávneho kódu znemožní otvorenie vášho spisu. Po 3 neúspešných pokusoch bude prístup dočasne zablokovaný na 1 hodinu.
+        </div>
+        
+        <div style="text-align: left;">
+            <button class="btn-concrete-back" onclick="showPage('page-home')">Späť</button>
+        </div>
+    </section>
+
+    <section id="page-loading" class="hidden">
+        <div class="header-box">
+            <h1>SYSTÉMOVÁ ANALÝZA</h1>
+        </div>
+        
+        <div class="tech-msg-display-zone">
+            <div id="live-tech-text" class="tech-display-text"></div>
+        </div>
+
+        <div class="progress-bar-container">
+            <div class="progress-bar-liquid" id="horizontal-liquid"></div>
+        </div>
+
+        <button class="btn-concrete" onclick="cancelLoading()">Anulovať vyhľadávanie</button>
+    </section>
+
+    <section id="page-granted" class="hidden fade-up">
+        <div class="status-top-bar">
+            Prístup povolený. Dokument úspešne načítaný.
+        </div>
+        <div class="circle-container">
+            <div class="circle-liquid" id="circle-fill"></div>
+            <div class="checkmark-white" id="circle-check">✓</div>
+        </div>
+    </section>
+
+    <section id="page-error" class="hidden fade-up">
+        <div class="header-box">
+            <h1>CHYBA SYSTÉMU</h1>
+        </div>
+        <div style="margin-top: 20px; line-height: 1.6;">
+            <p id="error-desc" style="color: var(--error-red); font-weight: bold;"></p>
+            <p id="error-timer" style="color: var(--error-red); font-weight: bold; margin-top: 20px; font-size: 20px;"></p>
+        </div>
+        <button id="error-back-btn" class="btn-concrete" onclick="showPage('page-terminal')">Späť</button>
+    </section>
+
+    <section id="page-result" class="hidden">
+        <div class="status-top-bar" style="font-size: 19px;">
+            OVERENIE ÚSÚPEŠNÉ
+        </div>
+        
+        <div class="layout-left">
+            <div><strong>STATUS PRÍSTUPU:</strong> <span style="color: var(--primary-green); font-weight: bold;">AKCEPTOVANÝ</span></div>
+            <div><strong>PROTOKOL:</strong> Bezpečné spojenie šifrované protokolom TLS 1.3</div>
+            <div><strong>INTEGRITA DÁT:</strong> Overená a overená elektronickým podpisom štátu</div>
+        </div>
+
+        <div class="pdf-container">
+            <div id="scanner-line" class="scan-line"></div>
+            <iframe id="pdf-view" src="" width="100%" height="100%" style="border:none;"></iframe>
+        </div>
+
+        <span class="blink-text">
+            V prípade ťažkostí s prezeraním kliknite na ikonu stiahnutia <span class="arrow-up-css">↑</span> vo vašom prehliadači, alebo nás okamžite kontaktujte, aby sme vám spis zaslali správou.
+        </span>
+
+        <button class="btn-minimal" onclick="showPage('page-final')">Finalizovať overenie</button>
+    </section>
+
+    <section id="page-final" class="hidden fade-up">
+        <div class="header-box">
+            <h1>ZÁVEREČNÁ VALIDÁCIA</h1>
+        </div>
+        <p>Ďakujeme za dokončenie procesu. Skontrolovali ste všetky údaje?</p>
+        
+        <p style="font-weight: bold; margin-top: 25px;">Našli ste nejakú chybu?</p>
+        
+        <span style="color: #2980b9; font-weight: bold; text-decoration: underline; cursor: pointer; display: block; margin: 15px 0;" onclick="toggleEmailDisplay()">
+            Kliknite sem pre nahlásenie technickej chyby
+        </span>
+
+        <div id="email-container" class="email-display-box hidden">
+            Kontaktujte nás priamo na: <a href="mailto:skdocumenta@gmail.com" class="email-link">skdocumenta@gmail.com</a>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #ccc; margin: 30px 0;">
+        <p>Ak je všetko v poriadku, môžete overenie úplne ukončiť kliknutím nižšie.</p>
+        <button class="btn-concrete" onclick="closeEverything()">Zatvoriť a ukončiť</button>
+    </section>
+
+</div>
+
+<script>
+    let attempts = parseInt(localStorage.getItem('attempts_sk') || 0);
+    let searchInterval;
+    let audioLoop = null;
+
+    const database = {
+        "SK7519B": { file: "file/validaciaspisu.pdf" }
+    };
+
+    const techMessages = [
+        "<strong>Spojenie :</strong> Nadväzovanie šifrovaného spojenia s centrálnym registrom Slovenskej republiky.",
+        "<strong>Overenie :</strong> Kontrola autorizačných prístupov v národnej databáze záznamov.",
+        "<strong>Hľadanie :</strong> Prehľadávanie štátneho registra aktívnych spisov a príloh.",
+        "<strong>Sťahovanie :</strong> Bezpečný prenos šifrovaného digitálneho dokumentu zo servera.",
+        "<strong>Dekódovanie :</strong> Overovanie integrity dátových štruktúr a overenie podpisu."
+    ];
+
+    function togglePrivacy() {
+        document.getElementById('main-content').classList.toggle('content-blur');
+        document.getElementById('eye-container').classList.toggle('eye-barred');
+    }
+
+    function showPage(id) {
+        stopSounds();
+        clearInterval(searchInterval);
+        document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+        document.getElementById(id).classList.remove('hidden');
+    }
+
+    function checkInitialBlock() {
+        let blockTime = localStorage.getItem('block_time_sk');
+        if (blockTime && new Date().getTime() < blockTime) {
+            triggerFinalBlock();
+        } else {
+            showPage('page-terminal');
+        }
+    }
+
+    const grid = document.getElementById('code-inputs');
+    for(let i=0; i<7; i++) {
+        let inp = document.createElement('input');
+        inp.className = 'box'; 
+        inp.maxLength = 1;
+        grid.appendChild(inp);
+        inp.addEventListener('input', (e) => { 
+            if(e.target.value && i<6) grid.children[i+1].focus(); 
+        });
+        inp.addEventListener('keydown', (e) => {
+            if(e.key === "Backspace" && !e.target.value && i>0) grid.children[i-1].focus();
+        });
+    }
+
+    function cancelLoading() { 
+        showPage('page-terminal'); 
+    }
+
+    function startVerificationProcess() {
+        let code = Array.from(grid.children).map(x => x.value).join('').toUpperCase();
+        if(code.length < 7) return;
+        runAnalysis(code);
+    }
+
+    function playSound(type) {
+        try {
+            const ac = new (window.AudioContext || window.webkitAudioContext)();
+            
+            if (type === 'success') {
+                let o = ac.createOscillator(); let g = ac.createGain();
+                o.connect(g); g.connect(ac.destination); o.type = 'triangle';
+                o.frequency.setValueAtTime(523.25, ac.currentTime);
+                o.frequency.setValueAtTime(659.25, ac.currentTime + 0.15);
+                o.frequency.setValueAtTime(783.99, ac.currentTime + 0.3);
+                g.gain.setValueAtTime(0.08, ac.currentTime);
+                o.start(); o.stop(ac.currentTime + 0.6);
+            } else if (type === 'scan') {
+                let clickCount = 0;
+                audioLoop = setInterval(() => {
+                    if(clickCount % 16 === 0 || clickCount % 16 === 2) {
+                        let o = ac.createOscillator(); let g = ac.createGain();
+                        o.connect(g); g.connect(ac.destination); o.type = 'sine';
+                        o.frequency.setValueAtTime(1200, ac.currentTime);
+                        g.gain.setValueAtTime(0.015, ac.currentTime);
+                        g.gain.exponentialRampToValueAtTime(0.00001, ac.currentTime + 0.03);
+                        o.start(); o.stop(ac.currentTime + 0.04);
+                    }
+                    clickCount++;
+                }, 120);
+            } else if (type === 'fail') {
+                let o = ac.createOscillator(); let g = ac.createGain();
+                o.connect(g); g.connect(ac.destination); o.type = 'sawtooth';
+                o.frequency.setValueAtTime(110, ac.currentTime);
+                g.gain.setValueAtTime(0.1, ac.currentTime);
+                o.start(); o.stop(ac.currentTime + 0.4);
+            }
+        } catch(e){}
+    }
+
+    function stopSounds() {
+        if(audioLoop) { clearInterval(audioLoop); audioLoop = null; }
+    }
+
+    function runAnalysis(code) {
+        showPage('page-loading');
+
+        let currentStep = 0;
+        const totalSteps = 5;
+        const timePerStep = 4000; 
+
+        const textElement = document.getElementById('live-tech-text');
+        const liquidBar = document.getElementById('horizontal-liquid');
+
+        function executeStep() {
+            if (currentStep < totalSteps) {
+                textElement.innerHTML = techMessages[currentStep];
+                
+                liquidBar.style.transition = 'none';
+                liquidBar.style.width = '0%';
+                
+                setTimeout(() => {
+                    liquidBar.style.transition = 'width 4s linear';
+                    liquidBar.style.width = '100%';
+                }, 50);
+
+                currentStep++;
+            } else {
+                clearInterval(searchInterval);
+                stopSounds();
+                
+                if(database[code]) {
+                    executeSuccessRoutine(code);
+                } else {
+                    executeFailureRoutine();
+                }
+            }
+        }
+
+        executeStep();
+        searchInterval = setInterval(executeStep, timePerStep);
+    }
+
+    function executeSuccessRoutine(code) {
+        showPage('page-granted');
+        playSound('success');
+        
+        const fill = document.getElementById('circle-fill');
+        const check = document.getElementById('circle-check');
+        
+        fill.style.transition = 'none'; fill.style.height = '0%';
+        check.style.opacity = '0';
+        
+        setTimeout(() => { 
+            fill.style.transition = 'height 3s linear'; 
+            fill.style.height = '100%'; 
+        }, 50);
+
+        setTimeout(() => {
+            check.style.opacity = '1';
+        }, 2200);
+
+        setTimeout(() => {
+            document.getElementById('pdf-view').src = database[code].file;
+            showPage('page-result');
+            
+            const line = document.getElementById('scanner-line');
+            line.classList.add('scan-active');
+            playSound('scan');
+
+            setTimeout(() => {
+                stopSounds();
+                line.classList.remove('scan-active');
+                line.style.display = 'none';
+            }, 4000);
+
+        }, 3000);
+    }
+
+    function executeFailureRoutine() {
+        playSound('fail');
+        attempts++;
+        localStorage.setItem('attempts_sk', attempts);
+
+        if(attempts >= 3) {
+            let futureBlock = new Date().getTime() + (1 * 60 * 60 * 1000);
+            localStorage.setItem('block_time_sk', futureBlock);
+            triggerFinalBlock();
+        } else {
+            document.getElementById('error-desc').innerText = "K tomuto kódu nie je priradený žiadny spis. Skontrolujte a skúste to znova.";
+            document.getElementById('error-timer').innerText = "Pozor! Zostávajú vám už len " + (3 - attempts) + " pokusy.";
+            document.getElementById('error-back-btn').classList.remove('hidden');
+            
+            grid.classList.add('shake');
+            setTimeout(() => grid.classList.remove('shake'), 4000);
+            
+            showPage('page-error');
+        }
+    }
+
+    function triggerFinalBlock() {
+        document.getElementById('error-desc').innerText = "Z dôvodu zabezpečenia vášho spisu bol prístup dočasne zablokovaný. Vráťte sa o 1 hodinu, kým sa prístup obnoví.";
+        document.getElementById('error-timer').innerText = ""; 
+        document.getElementById('error-back-btn').classList.add('hidden'); 
+        showPage('page-error');
+    }
+
+    function toggleEmailDisplay() {
+        document.getElementById('email-container').classList.toggle('hidden');
+    }
+
+    function closeEverything() {
+        document.getElementById('main-content').innerHTML = "<div style='padding:40px; font-weight:bold; color:var(--concrete-grey);'>Prebieha bezpečné odpájanie... Relácia bola bezpečne ukončená.</div>";
+        setTimeout(() => { document.body.innerHTML = ""; }, 1500);
+    }
+
+    document.onkeydown = function(e) {
+        if (e.keyCode === 123 || (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 67 || (e.shiftKey && e.keyCode === 73)))) {
+            return false;
+        }
+    };
+</script>
+
+</body>
+</html>
