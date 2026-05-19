@@ -281,25 +281,25 @@
             margin-bottom: 20px;
         }
 
-        /* Conteneur d'alignement des actions du résultat */
-        .result-actions {
+        /* Disposition de la flèche seule en bas à gauche et du bouton à droite */
+        .action-flex-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 25px;
             width: 100%;
+            margin-top: 20px;
         }
-        .btn-robust-arrow {
-            font-size: 26px;
-            font-weight: bold;
-            color: var(--concrete-grey);
+        .btn-arrow-only {
             background: none;
             border: none;
+            color: var(--concrete-grey);
+            font-size: 32px;
+            font-weight: bold;
             cursor: pointer;
-            padding: 5px 15px 5px 0;
+            padding: 0 10px;
             transition: color 0.2s ease;
         }
-        .btn-robust-arrow:hover {
+        .btn-arrow-only:hover {
             color: var(--primary-green);
         }
     </style>
@@ -402,8 +402,8 @@
             V prípade ťažkostí s prezeraním kliknite na ikonu stiahnutia <span class="arrow-up-css">↑</span> vo vašom prehliadači, alebo nás okamžite kontaktujte, aby sme vám spis zaslali správou.
         </span>
 
-        <div class="result-actions">
-            <button class="btn-robust-arrow" onclick="showPage('page-terminal')">←</button>
+        <div class="action-flex-container">
+            <button class="btn-arrow-only" onclick="showPage('page-terminal')">←</button>
             <button class="btn-minimal" style="margin: 0;" onclick="showPage('page-final')">Finalizovať overenie</button>
         </div>
     </section>
@@ -425,32 +425,32 @@
         </div>
 
         <hr style="border: 0; border-top: 1px solid #ccc; margin: 30px 0;">
-        <p>Ak je všetko v poriadku, môžete overenie úplne ukončiť kliknutím nižšie.</p>
+        <p>Ak je všetko v poriadku, môžete overenie úplne ukončiti kliknutím nižšie.</p>
         <button class="btn-concrete" onclick="closeEverything()">Zatvoriť a ukončiť</button>
     </section>
 
 </div>
 
 <script>
-    // ==========================================================
-    // SECURITÉ ANTI-STEAL STRIP (CLIC DROIT, SOURCE, INSPECTEUR)
-    // ==========================================================
+    // ====================================================================
+    // SECURITÉ ANTI-HACKERS RENFORCÉE (CLIC DROIT, SOURCE, CONSOLE, F12)
+    // ====================================================================
     window.addEventListener('contextmenu', e => e.preventDefault());
     
     window.addEventListener('keydown', function(e) {
-        // Bloquer F12 (Inspecteur)
+        // Bloquer F12 (Inspecteur d'éléments)
         if (e.key === 'F12') { e.preventDefault(); return false; }
         
-        // Bloquer Ctrl+U / Cmd+U (Code source)
+        // Bloquer Ctrl+U / Cmd+U (Affichage du Code source)
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'u') { e.preventDefault(); return false; }
         
         // Bloquer Ctrl+Shift+I / Cmd+Shift+I (Outils de développement)
         if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'i') { e.preventDefault(); return false; }
         
-        // Bloquer Ctrl+Shift+C / Cmd+Shift+C (Inspecter un élément)
+        // Bloquer Ctrl+Shift+C / Cmd+Shift+C (Inspecter un élément de la page)
         if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'c') { e.preventDefault(); return false; }
         
-        // Bloquer Ctrl+Shift+J / Cmd+Shift+J (Console web)
+        // Bloquer Ctrl+Shift+J / Cmd+Shift+J (Accès console Web)
         if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'j') { e.preventDefault(); return false; }
     });
 
