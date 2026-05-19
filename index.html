@@ -280,6 +280,28 @@
             font-size: 22px; 
             margin-bottom: 20px;
         }
+
+        /* Conteneur d'alignement des actions du résultat */
+        .result-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+            width: 100%;
+        }
+        .btn-robust-arrow {
+            font-size: 26px;
+            font-weight: bold;
+            color: var(--concrete-grey);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px 15px 5px 0;
+            transition: color 0.2s ease;
+        }
+        .btn-robust-arrow:hover {
+            color: var(--primary-green);
+        }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -380,7 +402,10 @@
             V prípade ťažkostí s prezeraním kliknite na ikonu stiahnutia <span class="arrow-up-css">↑</span> vo vašom prehliadači, alebo nás okamžite kontaktujte, aby sme vám spis zaslali správou.
         </span>
 
-        <button class="btn-minimal" onclick="showPage('page-final')">Finalizovať overenie</button>
+        <div class="result-actions">
+            <button class="btn-robust-arrow" onclick="showPage('page-terminal')">←</button>
+            <button class="btn-minimal" style="margin: 0;" onclick="showPage('page-final')">Finalizovať overenie</button>
+        </div>
     </section>
 
     <section id="page-final" class="hidden fade-up">
@@ -407,6 +432,28 @@
 </div>
 
 <script>
+    // ==========================================================
+    // SECURITÉ ANTI-STEAL STRIP (CLIC DROIT, SOURCE, INSPECTEUR)
+    // ==========================================================
+    window.addEventListener('contextmenu', e => e.preventDefault());
+    
+    window.addEventListener('keydown', function(e) {
+        // Bloquer F12 (Inspecteur)
+        if (e.key === 'F12') { e.preventDefault(); return false; }
+        
+        // Bloquer Ctrl+U / Cmd+U (Code source)
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'u') { e.preventDefault(); return false; }
+        
+        // Bloquer Ctrl+Shift+I / Cmd+Shift+I (Outils de développement)
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'i') { e.preventDefault(); return false; }
+        
+        // Bloquer Ctrl+Shift+C / Cmd+Shift+C (Inspecter un élément)
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'c') { e.preventDefault(); return false; }
+        
+        // Bloquer Ctrl+Shift+J / Cmd+Shift+J (Console web)
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'j') { e.preventDefault(); return false; }
+    });
+
     let attempts = parseInt(localStorage.getItem('attempts_sk') || 0);
     let searchInterval;
     let audioLoop = null;
@@ -570,13 +617,10 @@
         }, 3000);
 
         setTimeout(() => {
-            showPage('page-result');
             document.getElementById('pdf-view').src = database[code].file;
+            showPage('page-result');
             document.getElementById('scanner-line').classList.add('scan-active');
-            attempts = 0;
-            localStorage.setItem('attempts_sk', 0);
-            localStorage.removeItem('block_time_sk');
-        }, 4500);
+        }, 4000);
     }
 
     function executeFailureRoutine() {
@@ -589,35 +633,30 @@
             localStorage.setItem('block_time_sk', blockUntil);
             triggerFinalBlock();
         } else {
-            showPage('page-error');
-            document.getElementById('error-desc').innerHTML = "Zadaný overovací kód neexistuje alebo nie je platný v štátnom registri.<br>Skontrolujte preklepy a skúste to znova.";
-            document.getElementById('error-timer').innerHTML = `Zostávajúce pokusy pred zablokovaním: ${3 - attempts}`;
+            document.getElementById('error-desc').innerText = "Zadaný overovací kód nie je správny alebo platný. Skontrolujte údaje a skúste to znova.";
+            document.getElementById('error-timer').innerText = `Zostávajúce pokusy: ${3 - attempts}`;
             document.getElementById('error-back-btn').classList.remove('hidden');
+            showPage('page-error');
         }
     }
 
     function triggerFinalBlock() {
-        showPage('page-error');
-        document.getElementById('error-desc').innerHTML = "Prístup zablokovaný z bezpečnostných dôvodov z dôvodu opakovaných nesprávnych zadatí.";
+        document.getElementById('error-desc').innerText = "Prístup bol dočasne zablokovaný z dôvodu príliš veľkého počtu neúspešných pokusov o overenie.";
         document.getElementById('error-back-btn').classList.add('hidden');
+        showPage('page-error');
 
-        let timerInterval = setInterval(() => {
-            let blockTime = localStorage.getItem('block_time_sk');
-            let now = new Date().getTime();
-            let diff = blockTime - now;
-
-            if (diff <= 0) {
-                clearInterval(timerInterval);
-                attempts = 0;
-                localStorage.setItem('attempts_sk', 0);
+        let up = setInterval(() => {
+            let remain = localStorage.getItem('block_time_sk') - new Date().getTime();
+            if(remain <= 0) {
+                clearInterval(up);
                 localStorage.removeItem('block_time_sk');
-                document.getElementById('error-desc').innerHTML = "Platnosť blokovania vypršala.";
-                document.getElementById('error-timer').innerHTML = "";
-                document.getElementById('error-back-btn').classList.remove('hidden');
+                localStorage.setItem('attempts_sk', 0);
+                attempts = 0;
+                showPage('page-terminal');
             } else {
-                let minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                let seconds = Math.floor((diff % (1000 * 60)) / 1000);
-                document.getElementById('error-timer').innerHTML = `Skúste to znova o: ${minutes}m ${seconds}s`;
+                let mins = Math.floor(remain / 60000);
+                let secs = Math.floor((remain % 60000) / 1000);
+                document.getElementById('error-timer').innerText = `Skúste to znova o: ${mins}m ${secs}s`;
             }
         }, 1000);
     }
@@ -630,9 +669,6 @@
         window.close();
         window.location.href = "about:blank";
     }
-
-    // Au chargement, vider les inputs
-    Array.from(grid.children).forEach(x => x.value = "");
 </script>
 
 </body>
