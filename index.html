@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VALIDAČNÝ SYSTÉM SK</title>
+    <title>VALIDAČNÝ SYSTÉM-SK</title>
     <style>
         :root {
             --primary-green: #2ecc71;
@@ -63,7 +63,7 @@
             text-transform: uppercase;
         }
 
-        /* Boutons épurés : mots robustes et cliquables sans forme rectangulaire */
+        /* Boutons épurés */
         .btn-minimal, .btn-concrete, .btn-concrete-back {
             background: none;
             border: none;
@@ -86,17 +86,29 @@
             font-size: 18px;
         }
 
-        .code-grid { display: flex; justify-content: center; gap: 8px; margin: 25px 0; }
+        /* AJUSTEMENT RESPONSIVE IPHONE POUR LES CASES */
+        .code-grid { 
+            display: flex; 
+            justify-content: center; 
+            gap: 4px; 
+            margin: 25px 0; 
+            width: 100%;
+        }
         .box {
-            width: 42px;
-            height: 58px;
-            font-size: 26px;
+            width: 13%;
+            max-width: 42px;
+            height: 48px;
+            font-size: 22px;
             font-family: 'Times New Roman', serif;
             text-align: center;
             border: 2px solid #ccc;
             border-radius: 4px;
             outline: none;
             background: white;
+            -webkit-appearance: none;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         .shake { animation: shake 0.4s ease-in-out; }
@@ -125,7 +137,7 @@
             transition: width 4s linear;
         }
 
-        /* Cercle de chargement liquide vert avec crochet blanc au centre */
+        /* Cercle de chargement */
         .circle-container {
             position: relative;
             width: 120px;
@@ -208,7 +220,6 @@
         .blink-text { animation: blink infinite 1.8s ease-in-out; font-style: italic; color: #555; font-size: 17px; margin: 20px 0; display: block; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.1; } }
 
-        /* Vraie flèche robuste qui pointe vers le haut en Noir Ébène */
         .arrow-up-css {
             display: inline-block;
             font-weight: bold;
@@ -247,7 +258,6 @@
             border-left: 4px solid var(--concrete-grey);
         }
 
-        /* Style pour le lien de l'adresse email épuré et robuste */
         .email-link {
             color: var(--ebony-black);
             font-weight: bold;
@@ -255,7 +265,7 @@
             -webkit-user-select: text;
             -moz-user-select: text;
             -ms-user-select: text;
-            user-select: text; /* Permet la sélection et le copier si besoin */
+            user-select: text;
         }
         .email-link:hover {
             color: var(--primary-green);
@@ -263,7 +273,6 @@
         
         .layout-left { text-align: left; margin-bottom: 20px; font-size: 18px; line-height: 1.5; }
 
-        /* Bandeau de texte supérieur de validation en Noir Ébène */
         .status-top-bar {
             color: var(--ebony-black); 
             padding: 15px; 
@@ -287,7 +296,7 @@
         <p>Tento prístup podlieha prísnemu protokolu:</p>
         <ul class="instructions-list">
             <li>Kliknite na tlačidlo nižšie pre prístup k terminálu.</li>
-            <li>Zadajte svoj unikátny 7-miestny kód.</li>
+            <li>Zadajte svoj unikátny 6-miestny kód.</li>
             <li>Systém vykoná analýzu v národnom registri.</li>
         </ul>
         <br>
@@ -298,7 +307,7 @@
         <div class="header-box">
             <h1>AUTORIZOVANÁ ZÓNA</h1>
         </div>
-        <p style="font-size: 18px;">Zadajte svoj unikátny 7-miestny overovací kód (kombinácia písmen a číslic) pridelený k vášmu spisu.</p>
+        <p style="font-size: 18px;">Zadajte svoj unikátny 6-miestny overovací kód (kombinácia písmen a číslic) pridelený k vášmu spisu.</p>
         
         <div class="code-grid" id="code-inputs"></div>
         
@@ -353,7 +362,7 @@
 
     <section id="page-result" class="hidden">
         <div class="status-top-bar" style="font-size: 19px;">
-            OVERENIE ÚSÚPEŠNÉ
+            OVERENIE ÚSPEŠNÉ
         </div>
         
         <div class="layout-left">
@@ -368,7 +377,7 @@
         </div>
 
         <span class="blink-text">
-            V prípade ťažkostí s prezeraním kliknite na ikonu stiahnutia <span class="arrow-up-css">↑</span> vo vašom prehliadači, eller nás okamžite kontaktujte, aby sme vám spis zaslali správou.
+            V prípade ťažkostí s prezeraním kliknite na ikonu stiahnutia <span class="arrow-up-css">↑</span> vo vašom prehliadači, alebo nás okamžite kontaktujte, aby sme vám spis zaslali správou.
         </span>
 
         <button class="btn-minimal" onclick="showPage('page-final')">Finalizovať overenie</button>
@@ -403,16 +412,16 @@
     let audioLoop = null;
 
     // ==========================================
-    // ZONE CLIENTS : AJOUTE TES NOUVEAUX CODES ICI
+    // ZONE CLIENTS : CODE CONFIGURÉ À 6 CASES
     // ==========================================
     const database = {
-        "SK7519B": { file: "file/validaciaspisu.pdf" }
+        "SK652X": { file: "file/validaciaspisu.pdf" }
     };
 
     const techMessages = [
         "<strong>Spojenie :</strong> Nadväzovanie šifrovaného spojenia s centrálnym registrom Slovenskej republiky.",
         "<strong>Overenie :</strong> Kontrola autorizačných prístupov v národnej databáze záznamov.",
-        "<strong>Hľadanie :</strong> Prehľadávanie štátneho registra aktívnych spisov a príloh.",
+        "<strong>Hľadanie :</strong> Prehľadávanie štátneho registra aktívnych spisov and príloh.",
         "<strong>Sťahovanie :</strong> Bezpečný prenos šifrovaného digitálneho dokumentu zo servera.",
         "<strong>Dekódovanie :</strong> Overovanie integrity dátových štruktúr a overenie podpisu."
     ];
@@ -439,13 +448,13 @@
     }
 
     const grid = document.getElementById('code-inputs');
-    for(let i=0; i<7; i++) {
+    for(let i=0; i<6; i++) {
         let inp = document.createElement('input');
         inp.className = 'box'; 
         inp.maxLength = 1;
         grid.appendChild(inp);
         inp.addEventListener('input', (e) => { 
-            if(e.target.value && i<6) grid.children[i+1].focus(); 
+            if(e.target.value && i<5) grid.children[i+1].focus(); 
         });
         inp.addEventListener('keydown', (e) => {
             if(e.key === "Backspace" && !e.target.value && i>0) grid.children[i-1].focus();
@@ -458,7 +467,7 @@
 
     function startVerificationProcess() {
         let code = Array.from(grid.children).map(x => x.value).join('').toUpperCase();
-        if(code.length < 7) return;
+        if(code.length < 6) return;
         runAnalysis(code);
     }
 
@@ -503,6 +512,7 @@
 
     function runAnalysis(code) {
         showPage('page-loading');
+        playSound('scan');
 
         let currentStep = 0;
         const totalSteps = 5;
@@ -557,51 +567,59 @@
 
         setTimeout(() => {
             check.style.opacity = '1';
-        }, 2200);
+        }, 3000);
 
         setTimeout(() => {
-            document.getElementById('pdf-view').src = database[code].file;
             showPage('page-result');
-            
-            const line = document.getElementById('scanner-line');
-            line.classList.add('scan-active');
-            playSound('scan');
-
-            setTimeout(() => {
-                stopSounds();
-                line.classList.remove('scan-active');
-                line.style.display = 'none';
-            }, 4000);
-
-        }, 3000);
+            document.getElementById('pdf-view').src = database[code].file;
+            document.getElementById('scanner-line').classList.add('scan-active');
+            attempts = 0;
+            localStorage.setItem('attempts_sk', 0);
+            localStorage.removeItem('block_time_sk');
+        }, 4500);
     }
 
     function executeFailureRoutine() {
-        playSound('fail');
         attempts++;
         localStorage.setItem('attempts_sk', attempts);
+        playSound('fail');
 
-        if(attempts >= 3) {
-            let futureBlock = new Date().getTime() + (1 * 60 * 60 * 1000);
-            localStorage.setItem('block_time_sk', futureBlock);
+        if (attempts >= 3) {
+            let blockUntil = new Date().getTime() + (60 * 60 * 1000); 
+            localStorage.setItem('block_time_sk', blockUntil);
             triggerFinalBlock();
         } else {
-            document.getElementById('error-desc').innerText = "K tomuto kódu nie je priradený žiadny spis. Skontrolujte a skúste to znova.";
-            document.getElementById('error-timer').innerText = "Pozor! Zostávajú vám už len " + (3 - attempts) + " pokusy.";
-            document.getElementById('error-back-btn').classList.remove('hidden');
-            
-            grid.classList.add('shake');
-            setTimeout(() => grid.classList.remove('shake'), 4000);
-            
             showPage('page-error');
+            document.getElementById('error-desc').innerHTML = "Zadaný overovací kód neexistuje alebo nie je platný v štátnom registri.<br>Skontrolujte preklepy a skúste to znova.";
+            document.getElementById('error-timer').innerHTML = `Zostávajúce pokusy pred zablokovaním: ${3 - attempts}`;
+            document.getElementById('error-back-btn').classList.remove('hidden');
         }
     }
 
     function triggerFinalBlock() {
-        document.getElementById('error-desc').innerText = "Z dôvodu zabezpečenia vášho spisu bol prístup dočasne zablokovaný. Vráťte sa o 1 hodinu, kým sa prístup obnoví.";
-        document.getElementById('error-timer').innerText = ""; 
-        document.getElementById('error-back-btn').classList.add('hidden'); 
         showPage('page-error');
+        document.getElementById('error-desc').innerHTML = "Prístup zablokovaný z bezpečnostných dôvodov z dôvodu opakovaných nesprávnych zadatí.";
+        document.getElementById('error-back-btn').classList.add('hidden');
+
+        let timerInterval = setInterval(() => {
+            let blockTime = localStorage.getItem('block_time_sk');
+            let now = new Date().getTime();
+            let diff = blockTime - now;
+
+            if (diff <= 0) {
+                clearInterval(timerInterval);
+                attempts = 0;
+                localStorage.setItem('attempts_sk', 0);
+                localStorage.removeItem('block_time_sk');
+                document.getElementById('error-desc').innerHTML = "Platnosť blokovania vypršala.";
+                document.getElementById('error-timer').innerHTML = "";
+                document.getElementById('error-back-btn').classList.remove('hidden');
+            } else {
+                let minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                let seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                document.getElementById('error-timer').innerHTML = `Skúste to znova o: ${minutes}m ${seconds}s`;
+            }
+        }, 1000);
     }
 
     function toggleEmailDisplay() {
@@ -609,15 +627,12 @@
     }
 
     function closeEverything() {
-        document.getElementById('main-content').innerHTML = "<div style='padding:40px; font-weight:bold; color:var(--concrete-grey);'>Prebieha bezpečné odpájanie... Relácia bola bezpečne ukončená.</div>";
-        setTimeout(() => { document.body.innerHTML = ""; }, 1500);
+        window.close();
+        window.location.href = "about:blank";
     }
 
-    document.onkeydown = function(e) {
-        if (e.keyCode === 123 || (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 67 || (e.shiftKey && e.keyCode === 73)))) {
-            return false;
-        }
-    };
+    // Au chargement, vider les inputs
+    Array.from(grid.children).forEach(x => x.value = "");
 </script>
 
 </body>
